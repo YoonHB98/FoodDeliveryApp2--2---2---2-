@@ -27,10 +27,10 @@ function SignIn({navigation}: SignInScreenProps) {
   const emailRef = useRef<TextInput | null>(null);
   const passwordRef = useRef<TextInput | null>(null);
 
-  const onChangeEmail = useCallback((text: string) => {
+  const onChangeEmail = useCallback(text => {
     setEmail(text.trim());
   }, []);
-  const onChangePassword = useCallback((text: string) => {
+  const onChangePassword = useCallback(text => {
     setPassword(text.trim());
   }, []);
   const onSubmit = useCallback(async () => {
@@ -65,7 +65,7 @@ function SignIn({navigation}: SignInScreenProps) {
     } catch (error) {
       const errorResponse = (error as AxiosError).response;
       if (errorResponse) {
-        Alert.alert('알림', (errorResponse.data as {message: string}).message);
+        Alert.alert('알림', errorResponse.data.message);
       }
     } finally {
       setLoading(false);

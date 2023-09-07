@@ -26,13 +26,13 @@ function SignUp({navigation}: SignUpScreenProps) {
   const nameRef = useRef<TextInput | null>(null);
   const passwordRef = useRef<TextInput | null>(null);
 
-  const onChangeEmail = useCallback((text: string) => {
+  const onChangeEmail = useCallback(text => {
     setEmail(text.trim());
   }, []);
-  const onChangeName = useCallback((text: string) => {
+  const onChangeName = useCallback(text => {
     setName(text.trim());
   }, []);
-  const onChangePassword = useCallback((text: string) => {
+  const onChangePassword = useCallback(text => {
     setPassword(text.trim());
   }, []);
   const onSubmit = useCallback(async () => {
@@ -76,7 +76,7 @@ function SignUp({navigation}: SignUpScreenProps) {
       const errorResponse = (error as AxiosError).response;
       console.error(errorResponse);
       if (errorResponse) {
-        Alert.alert('알림', (errorResponse.data as {message: string}).message);
+        Alert.alert('알림', errorResponse.data.message);
       }
     } finally {
       setLoading(false);
