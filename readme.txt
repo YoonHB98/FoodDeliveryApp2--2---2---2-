@@ -24,3 +24,7 @@ redux
 
 accessToken 유효기간 ex)은행
 refreshToken 토큰 재발급
+
+socket 키와 값
+emit은 보내기 ex) login이라는 키로 hello라는 값을 보내고
+on off 받기 hello라는 키로 값을 받고
