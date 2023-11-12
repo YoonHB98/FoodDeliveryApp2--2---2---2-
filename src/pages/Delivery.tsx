@@ -1,20 +1,24 @@
-import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import Complete from './Complete';
+import React, {useCallback} from 'react';
+import {FlatList, View} from 'react-native';
+import {Order} from '../slices/order';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store/reducer';
 import Ing from './Ing';
 
-const Stack = createNativeStackNavigator();
-
 function Delivery() {
+  const orders = useSelector((state: RootState) => state.order.deliveries);
+  const renderItem = useCallback(({item}: {item: Order}) => {
+    return <Ing item={item} />;
+  }, []);
+
   return (
-    <Stack.Navigator>
-      <Stack.Screen name="Ing" component={Ing} options={{title: '내 오더'}} />
-      <Stack.Screen
-        name="Complete"
-        component={Complete}
-        options={{title: '완료하기'}}
+    <View>
+      <FlatList
+        data={orders}
+        keyExtractor={item => item.orderId}
+        renderItem={renderItem}
       />
-    </Stack.Navigator>
+    </View>
   );
 }
 

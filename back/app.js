@@ -1,4 +1,3 @@
-// **절대 실무용으로 사용하지 마세요. 강좌를 위한 백엔드 더미 구현입니다.** //
 const fs = require("fs");
 const path = require("path");
 const express = require("express");
@@ -9,6 +8,12 @@ const shortid = require("shortid");
 const multer = require("multer");
 const admin = require("firebase-admin");
 
+const app = express();
+const server = require('http').Server(app);
+const io = SocketIO(server, {
+  path: "/socket.io",
+});
+
 let phoneToken;
 // process.env.GOOGLE_APPLICATION_CREDENTIALS =
 //   "./fooddeliveryapp-6609a-firebase-adminsdk-nev9a-603a8b9ae6.json";
@@ -18,7 +23,8 @@ let phoneToken;
 //   databaseURL: "https://fooddeliveryapp-6609a.firebaseio.com",
 // });
 const orders = [];
-const app = express();
+
+
 app.use("/", express.static(path.join(__dirname, "uploads")));
 app.use(morgan("dev"));
 app.use(express.json());
@@ -78,6 +84,7 @@ const verifyRefreshToken = (req, res, next) => {
 app.get("/", (req, res) => {
   res.send("ok");
 });
+
 app.post("/refreshToken", verifyRefreshToken, (req, res, next) => {
   const accessToken = jwt.sign(
     { sub: "access", email: res.locals.email },
@@ -96,6 +103,8 @@ app.post("/refreshToken", verifyRefreshToken, (req, res, next) => {
   });
 });
 
+
+
 app.post("/user", (req, res, next) => {
   if (users[req.body.email]) {
     return res.status(401).json({ message: "이미 가입한 회원입니다." });
@@ -111,6 +120,31 @@ app.post("/user", (req, res, next) => {
       email: req.body.email,
       name: req.body.name,
     },
+  });
+});
+
+app.post('/saveTempNumber', (req, res) => {
+  const tempNumber = req.body.tempNumber;
+  console.log(`Received tempNumber from client: ${tempNumber}`);
+
+  // 여기서 tempNumber를 사용하여 파일을 생성하는 로직을 추가할 수 있습니다.
+  // 예를 들어, C:\Temp.txt에 저장하려면 다음과 같이 사용할 수 있습니다.
+  const filePath = path.join('C:\\', 'Temp.txt');
+  
+  // 디렉토리가 없으면 생성
+  const dirPath = path.dirname(filePath);
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+
+  // 비동기 writeFile을 사용하여 파일 생성
+  fs.writeFile(filePath, tempNumber.toString(), (err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: '파일 저장 중 오류가 발생했습니다.' });
+    } else {
+      res.json({ message: '임시 숫자를 파일에 저장했습니다.' });
+    }
   });
 });
 
@@ -141,6 +175,7 @@ app.post("/login", (req, res, next) => {
     },
   });
 });
+
 app.post("/logout", verifyToken, (req, res, next) => {
   delete users[res.locals.email];
   res.json({ message: "ok" });
@@ -150,11 +185,6 @@ app.post("/accept", verifyToken, (req, res, next) => {
   const order = orders.find((v) => v.orderId === req.body.orderId);
   if (!order) {
     return res.status(400).json({ message: "유효하지 않은 주문입니다." });
-  }
-  if (order.rider) {
-    return res
-      .status(400)
-      .json({ message: "다른 사람이 이미 수락한 주문건입니다. " });
   }
   order.rider = res.locals.email;
   console.log(order);
@@ -219,10 +249,12 @@ app.post("/complete", verifyToken, upload.single("image"), (req, res, next) => {
   }
   res.send("ok");
 });
+
 app.post("/phonetoken", (req, res, next) => {
   phoneToken = req.body.token;
   res.send("ok");
 });
+
 app.get("/showmethemoney", verifyToken, (req, res, next) => {
   const order = orders.filter(
     (v) => v.rider === res.locals.email && !!v.completedAt
@@ -246,13 +278,6 @@ app.use((err, req, res, next) => {
   res.status(500).json(err);
 });
 
-const server = app.listen(3105, () => {
-  console.log("연결되었습니다.");
-});
-
-const io = SocketIO(server, {
-  path: "/socket.io",
-});
 app.set("io", io);
 
 io.on("connection", (socket) => {
@@ -304,4 +329,10 @@ io.on("connection", (socket) => {
       clearInterval(orderId);
     }
   });
+});
+
+const PORT = 3105;
+
+server.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}`);
 });

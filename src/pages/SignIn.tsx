@@ -27,10 +27,10 @@ function SignIn({navigation}: SignInScreenProps) {
   const emailRef = useRef<TextInput | null>(null);
   const passwordRef = useRef<TextInput | null>(null);
 
-  const onChangeEmail = useCallback(text => {
+  const onChangeEmail = useCallback((text: string) => {
     setEmail(text.trim());
   }, []);
-  const onChangePassword = useCallback(text => {
+  const onChangePassword = useCallback((text: string) => {
     setPassword(text.trim());
   }, []);
   const onSubmit = useCallback(async () => {
@@ -45,7 +45,7 @@ function SignIn({navigation}: SignInScreenProps) {
     }
     try {
       setLoading(true);
-      const response = await axios.post(`${Config.API_URL}/login`, {
+      const response = await axios.post(`http://10.0.2.2:3105/login`, {
         email,
         password,
       });
